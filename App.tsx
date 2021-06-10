@@ -1,30 +1,31 @@
 import React from "react";
 import { ThemeProvider } from "styled-components";
 import {
-  useFonts,
-  Poppins_400Regular,
-  Poppins_500Medium,
-  Poppins_700Bold,
+	useFonts,
+	Poppins_400Regular,
+	Poppins_500Medium,
+	Poppins_700Bold,
 } from "@expo-google-fonts/poppins";
 import AppLoading from "expo-app-loading";
 
 import { Dashboard } from "./src/screens/Dashboard";
+import { Register } from "./src/screens/Register";
 import theme from "./src/global/styles/theme";
 
 export default function App() {
-  const [isFontsLoaded] = useFonts({
-    Poppins_400Regular,
-    Poppins_500Medium,
-    Poppins_700Bold,
-  });
+	const [isFontsLoaded] = useFonts({
+		Poppins_400Regular,
+		Poppins_500Medium,
+		Poppins_700Bold,
+	});
 
-  if (!isFontsLoaded) {
-    return <AppLoading />;
-  }
+	if (!isFontsLoaded) {
+		return <AppLoading />;
+	}
 
-  return (
-    <ThemeProvider theme={theme}>
-      <Dashboard />
-    </ThemeProvider>
-  );
+	return (
+		<ThemeProvider theme={theme}>
+			<Register />
+		</ThemeProvider>
+	);
 }

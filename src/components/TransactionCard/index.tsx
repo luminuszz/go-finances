@@ -17,7 +17,7 @@ interface Props {
 	transaction: TransactionData;
 }
 
-function TransactionCard({ transaction }: Props) {
+export default function TransactionCard({ transaction }: Props) {
 	const { amount, category, date, title, type } = transaction;
 
 	const formattedAmount = `${type === "positive" ? "+" : "-"} ${amount}`;
@@ -37,5 +37,3 @@ function TransactionCard({ transaction }: Props) {
 		</Atoms.Container>
 	);
 }
-
-export default TransactionCard;

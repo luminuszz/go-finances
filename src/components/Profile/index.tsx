@@ -4,7 +4,7 @@ import * as Atoms from "./styles";
 
 type Props = {};
 
-function Profile(props: Props) {
+export default function Profile(props: Props) {
 	return (
 		<Atoms.Container>
 			<Atoms.UserInfo>
@@ -22,5 +22,3 @@ function Profile(props: Props) {
 		</Atoms.Container>
 	);
 }
-
-export default Profile;
