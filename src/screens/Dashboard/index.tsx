@@ -1,8 +1,9 @@
 import React from "react";
-import * as Atoms from "./styles";
 
-import * as Components from "../../components";
 import { TransactionData } from "../../components/TransactionCard";
+import * as Components from "../../components";
+
+import * as Atoms from "./styles";
 
 type Transaction = {
 	type: "up" | "down" | "total";

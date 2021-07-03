@@ -1,6 +1,8 @@
-import styled from "styled-components/native";
 import { Feather } from "@expo/vector-icons";
 import { getStatusBarHeight } from "react-native-iphone-x-helper";
+import { BorderlessButton, RectButton } from "react-native-gesture-handler";
+
+import styled from "styled-components/native";
 
 export const Container = styled.View`
 	width: 100%;
@@ -42,6 +44,8 @@ export const UserName = styled.Text`
 	font-size: ${({ theme }) => theme.utils.RFValue(17)}px;
 	font-family: ${({ theme }) => theme.fonts.poppins.bold};
 `;
+
+export const IconButton = styled(BorderlessButton)``;
 
 export const Icon = styled(Feather)`
 	color: ${({ theme }) => theme.colors.secondary};

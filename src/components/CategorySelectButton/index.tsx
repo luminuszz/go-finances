@@ -1,9 +1,9 @@
 import React from "react";
-import { TouchableOpacityProps } from "react-native";
+import { RectButtonProps } from "react-native-gesture-handler";
 
 import * as Atoms from "./styles";
 
-type Props = TouchableOpacityProps & {
+type Props = RectButtonProps & {
 	title: string;
 	icon: string;
 };

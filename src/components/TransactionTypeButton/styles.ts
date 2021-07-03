@@ -1,6 +1,6 @@
 import styled, { css } from "styled-components/native";
 import { Feather } from "@expo/vector-icons";
-import { TouchableOpacity } from "react-native";
+import { RectButton } from "react-native-gesture-handler";
 import { opacify } from "polished";
 
 type IconsProps = {
@@ -12,7 +12,7 @@ type SelectedProps = {
 	type: "up" | "down";
 };
 
-export const Container = styled(TouchableOpacity)<SelectedProps>`
+export const Container = styled(RectButton)<SelectedProps>`
 	width: 48%;
 
 	flex-direction: row;

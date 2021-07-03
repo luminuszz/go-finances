@@ -18,7 +18,9 @@ export default function Profile(props: Props) {
 					<Atoms.UserName>Davi</Atoms.UserName>
 				</Atoms.User>
 			</Atoms.UserInfo>
-			<Atoms.Icon name="power" />
+			<Atoms.IconButton>
+				<Atoms.Icon name="power" />
+			</Atoms.IconButton>
 		</Atoms.Container>
 	);
 }
