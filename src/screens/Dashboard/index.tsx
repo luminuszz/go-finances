@@ -1,8 +1,14 @@
-import React from "react";
+import React, { useState, useEffect, useMemo } from "react";
+import { compareDesc } from "date-fns";
 
+import {
+	transactionRepository,
+	Transaction as TransactionEntity,
+	TransactionAVC,
+} from "../../services/asyncStorage/repositories/transaction.repository";
 import { TransactionData } from "../../components/TransactionCard";
-import * as Components from "../../components";
 
+import * as Components from "../../components";
 import * as Atoms from "./styles";
 
 type Transaction = {
@@ -33,51 +39,44 @@ const highlights: Transaction[] = [
 	},
 ];
 
-const transactions: TransactionData[] = [
-	{
-		amount: 15000,
-		type: "positive",
-		date: "18/05/2020",
-		title: "Transação feita",
-		category: {
-			icon: "dollar-sign",
-			label: "PIX",
-		},
-	},
-
-	{
-		amount: 15000,
-		type: "positive",
-		date: "18/05/2020",
-		title: "Transação feita",
-		category: {
-			icon: "dollar-sign",
-			label: "PIX",
-		},
-	},
-	{
-		amount: 35.58,
-		type: "negative",
-		date: "18/05/2020",
-		title: "Pizzaria Henriques",
-		category: {
-			icon: "coffee",
-			label: "Alimentação",
-		},
-	},
-	{
-		amount: 1200,
-		type: "negative",
-		date: "18/05/2020",
-		title: "Aluguel do apartamento",
-		category: {
-			icon: "shopping-bag",
-			label: "Outros",
-		},
-	},
-];
-
 export function Dashboard() {
+	const [transactions, setTransactions] = useState<TransactionEntity[]>([]);
+	const [transactionsHighlights, setTransactionsHighlights] =
+		useState<TransactionAVC>({
+			down: 0,
+			up: 0,
+			total: 0,
+		});
+
+	useEffect(() => {
+		(async () => {
+			const response = await transactionRepository.getTransactions();
+			const avc = await transactionRepository.getTransactionsMedia();
+
+			setTransactionsHighlights(avc);
+			setTransactions(response);
+		})();
+	}, [transactionRepository]);
+
+	console.log(transactionsHighlights);
+
+	const formattedTransactions = useMemo<TransactionData[]>(
+		() =>
+			transactions
+				.sort((a, b) => compareDesc(b.createdAt, a.createdAt))
+				.map((tr) => ({
+					amount: tr.price,
+					title: tr.name,
+					type: tr.selectedType === "up" ? "positive" : "negative",
+					category: {
+						icon: tr.selectedCategory.icon || "string",
+						label: tr.selectedCategory.name,
+					},
+					date: new Date(tr.createdAt).toLocaleDateString(),
+				})),
+		[transactions, compareDesc]
+	);
+
 	return (
 		<Atoms.Container>
 			<Atoms.Header>
@@ -100,7 +99,7 @@ export function Dashboard() {
 
 				<Atoms.TransactionList
 					keyExtractor={(item, i) => `${item}#${i}`}
-					data={transactions}
+					data={formattedTransactions}
 					renderItem={({ item }) => (
 						<Components.TransactionCard transaction={item} />
 					)}

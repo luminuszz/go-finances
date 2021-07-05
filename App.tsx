@@ -1,4 +1,5 @@
 import React from "react";
+import { Platform } from "react-native";
 import "react-native-gesture-handler";
 import { ThemeProvider } from "styled-components";
 import {
@@ -9,6 +10,7 @@ import {
 } from "@expo-google-fonts/poppins";
 import AppLoading from "expo-app-loading";
 import { NavigationContainer } from "@react-navigation/native";
+import FlashMessageContainer from "react-native-flash-message";
 
 import theme from "./src/global/styles/theme";
 
@@ -30,6 +32,12 @@ export default function App() {
 			<NavigationContainer>
 				<AppRoutes />
 			</NavigationContainer>
+
+			<FlashMessageContainer
+				style={{
+					marginTop: 38,
+				}}
+			/>
 		</ThemeProvider>
 	);
 }

@@ -1,14 +1,16 @@
-import React, { useCallback, useState } from "react";
+import React from "react";
 import { Keyboard, Modal, TouchableWithoutFeedback, Alert } from "react-native";
+import { useNavigation } from "@react-navigation/native";
+import { yupResolver } from "@hookform/resolvers/yup";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
-import { yupResolver } from "@hookform/resolvers/yup";
 
+import { transactionRepository } from "../../services/asyncStorage/repositories/transaction.repository";
+import { useMessage } from "../../hooks/useMessage";
 import { CategorySelect } from "../CategorySelect";
 import * as Components from "../../components";
 
 import * as Atoms from "./styles";
-
 type CategoryDTO = {
 	key: string;
 	name: string;
@@ -38,7 +40,9 @@ const schema = yup.object().shape({
 });
 
 export function Register() {
-	const [categoryModelOpen, setCategoryModelOpen] = useState(false);
+	const [categoryModelOpen, setCategoryModelOpen] = React.useState(false);
+	const { showMessage } = useMessage();
+	const { navigate } = useNavigation();
 
 	const {
 		control,
@@ -46,6 +50,7 @@ export function Register() {
 		watch,
 		formState: { errors },
 		setValue,
+		reset,
 	} = useForm<FormPayload>({
 		resolver: yupResolver(schema),
 		reValidateMode: "onChange",
@@ -58,7 +63,7 @@ export function Register() {
 		},
 	});
 
-	const handleCloseModal = useCallback(
+	const handleCloseModal = React.useCallback(
 		() => setCategoryModelOpen(false),
 		[setCategoryModelOpen]
 	);
@@ -66,13 +71,31 @@ export function Register() {
 	const handleOpenModal = () => setCategoryModelOpen(true);
 
 	const sendNewTransaction = async (formPayload: FormPayload) => {
-		console.log(formPayload);
+		try {
+			await transactionRepository.saveTransaction(formPayload);
+
+			showMessage("Transação salva com sucesso !", "success");
+			reset();
+			navigate("Listagem");
+		} catch (error) {
+			console.error(error);
+
+			showMessage("Não possível salvar a transação", "danger");
+		}
 	};
 
 	const [watchTransactionTypeType, watchSelectedCategory] = watch([
 		"selectedType",
 		"selectedCategory",
 	]);
+
+	React.useEffect(() => {
+		(async () => {
+			const data = await transactionRepository.getTransactions();
+
+			console.log(data);
+		})();
+	}, []);
 
 	return (
 		<TouchableWithoutFeedback onPress={Keyboard.dismiss}>
