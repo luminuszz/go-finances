@@ -6,6 +6,7 @@ export type TransactionData = {
 	type: "positive" | "negative";
 	title: string;
 	amount: number;
+	id: string;
 	category: {
 		label: string;
 		icon: string;

@@ -48,6 +48,10 @@ export const Title = styled.Text`
 	margin-bottom: 16px;
 `;
 
+export const LoadingTitle = styled.Text`
+	font-size: ${({ theme }) => theme.utils.RFValue(18)}px;
+`;
+
 export const TransactionList = styled(
 	FlatList as new () => FlatList<TransactionData>
 ).attrs(({ theme }) => ({

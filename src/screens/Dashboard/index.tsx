@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { compareDesc } from "date-fns";
+import { compareAsc } from "date-fns";
 
 import {
 	transactionRepository,
@@ -40,6 +40,7 @@ const highlights: Transaction[] = [
 ];
 
 export function Dashboard() {
+	const [loading, setLoading] = useState(false);
 	const [transactions, setTransactions] = useState<TransactionEntity[]>([]);
 	const [transactionsHighlights, setTransactionsHighlights] =
 		useState<TransactionAVC>({
@@ -48,34 +49,35 @@ export function Dashboard() {
 			total: 0,
 		});
 
+	const formattedTransactions = useMemo<TransactionData[]>(
+		() =>
+			transactions.map((tr) => ({
+				amount: tr.price,
+				id: tr.id,
+				title: tr.name,
+				type: tr.selectedType === "up" ? "positive" : "negative",
+				category: {
+					icon: tr.selectedCategory.icon || "string",
+					label: tr.selectedCategory.name,
+				},
+				date: new Date(tr.createdAt).toLocaleDateString(),
+			})),
+		[transactions]
+	);
+
 	useEffect(() => {
-		(async () => {
+		const execute = async () => {
+			setLoading(true);
 			const response = await transactionRepository.getTransactions();
 			const avc = await transactionRepository.getTransactionsMedia();
 
 			setTransactionsHighlights(avc);
 			setTransactions(response);
-		})();
+			setLoading(false);
+		};
+
+		execute();
 	}, [transactionRepository]);
-
-	console.log(transactionsHighlights);
-
-	const formattedTransactions = useMemo<TransactionData[]>(
-		() =>
-			transactions
-				.sort((a, b) => compareDesc(b.createdAt, a.createdAt))
-				.map((tr) => ({
-					amount: tr.price,
-					title: tr.name,
-					type: tr.selectedType === "up" ? "positive" : "negative",
-					category: {
-						icon: tr.selectedCategory.icon || "string",
-						label: tr.selectedCategory.name,
-					},
-					date: new Date(tr.createdAt).toLocaleDateString(),
-				})),
-		[transactions, compareDesc]
-	);
 
 	return (
 		<Atoms.Container>
@@ -83,27 +85,42 @@ export function Dashboard() {
 				<Components.Profile />
 			</Atoms.Header>
 			<Atoms.CardList>
-				{highlights.map((transaction) => (
-					<Components.HighLightCard
-						key={transaction.type}
-						type={transaction.type}
-						title={transaction.title}
-						amount={transaction.amount}
-						lastTransaction={transaction.lastTransaction}
-					/>
-				))}
+				<Components.HighLightCard
+					key={highlights[0].type}
+					type={highlights[0].type}
+					title={highlights[0].title}
+					amount={String(transactionsHighlights.up)}
+					lastTransaction={highlights[0].lastTransaction}
+				/>
+				<Components.HighLightCard
+					key={highlights[1].type}
+					type={highlights[1].type}
+					title={highlights[1].title}
+					amount={String(transactionsHighlights.down)}
+					lastTransaction={highlights[1].lastTransaction}
+				/>
+				<Components.HighLightCard
+					key={highlights[2].type}
+					type={highlights[2].type}
+					title={highlights[2].title}
+					amount={String(transactionsHighlights.total)}
+					lastTransaction={highlights[2].lastTransaction}
+				/>
 			</Atoms.CardList>
-
 			<Atoms.Transactions>
 				<Atoms.Title>Listagem</Atoms.Title>
 
-				<Atoms.TransactionList
-					keyExtractor={(item, i) => `${item}#${i}`}
-					data={formattedTransactions}
-					renderItem={({ item }) => (
-						<Components.TransactionCard transaction={item} />
-					)}
-				/>
+				{loading ? (
+					<Atoms.LoadingTitle />
+				) : (
+					<Atoms.TransactionList
+						keyExtractor={(item) => item.id}
+						data={formattedTransactions}
+						renderItem={({ item }) => (
+							<Components.TransactionCard transaction={item} />
+						)}
+					/>
+				)}
 			</Atoms.Transactions>
 		</Atoms.Container>
 	);
