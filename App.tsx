@@ -1,6 +1,8 @@
 import React from "react";
-import { Platform } from "react-native";
 import "react-native-gesture-handler";
+import "intl";
+import "intl/locale-data/jsonp/pt-BR";
+
 import { ThemeProvider } from "styled-components";
 import {
 	useFonts,

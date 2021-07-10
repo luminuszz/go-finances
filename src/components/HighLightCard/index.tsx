@@ -1,4 +1,5 @@
 import React from "react";
+import { formatCurrency, formatDate } from "../../utils/formats";
 
 import * as Atoms from "./styles";
 
@@ -6,7 +7,7 @@ interface Props {
 	type: "up" | "down" | "total";
 	title: string;
 	amount: string;
-	lastTransaction: string;
+	transactionDetails: Date | number | string;
 }
 
 type IconRef = Record<Props["type"], string>;
@@ -20,9 +21,18 @@ const iconOptions: IconRef = {
 export default function HighLightCard({
 	type,
 	amount,
-	lastTransaction,
+	transactionDetails,
 	title,
 }: Props) {
+	const formattedAmount = formatCurrency(amount);
+
+	const formattedLastTransaction =
+		type !== "total"
+			? `Última ${type === "up" ? "entrada" : "sáida"} dia ${formatDate(
+					new Date(transactionDetails)
+			  )}`
+			: transactionDetails;
+
 	return (
 		<Atoms.Container type={type}>
 			<Atoms.Header>
@@ -31,9 +41,11 @@ export default function HighLightCard({
 			</Atoms.Header>
 
 			<Atoms.Footer>
-				<Atoms.Amount type={type}>{amount}</Atoms.Amount>
+				<Atoms.Amount type={type}>{formattedAmount}</Atoms.Amount>
 				<Atoms.LastTransaction type={type}>
-					{lastTransaction}
+					<Atoms.LastTransaction type={type}>
+						{formattedLastTransaction}
+					</Atoms.LastTransaction>
 				</Atoms.LastTransaction>
 			</Atoms.Footer>
 		</Atoms.Container>

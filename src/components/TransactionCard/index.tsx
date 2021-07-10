@@ -5,7 +5,7 @@ import * as Atoms from "./styles";
 export type TransactionData = {
 	type: "positive" | "negative";
 	title: string;
-	amount: number;
+	amount: number | string;
 	id: string;
 	category: {
 		label: string;
@@ -21,7 +21,7 @@ interface Props {
 export default function TransactionCard({ transaction }: Props) {
 	const { amount, category, date, title, type } = transaction;
 
-	const formattedAmount = `${type === "positive" ? "+" : "-"} ${amount}`;
+	const formattedAmount = `${type === "positive" ? "+" : "-"}  ${amount}`;
 
 	return (
 		<Atoms.Container>

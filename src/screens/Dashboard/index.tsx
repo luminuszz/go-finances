@@ -1,11 +1,15 @@
-import React, { useState, useEffect, useMemo } from "react";
-import { compareAsc } from "date-fns";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
+import { ActivityIndicator } from "react-native";
+import { useFocusEffect } from "@react-navigation/native";
+import { useTheme } from "styled-components";
+import { formatDate } from "../../utils/formats";
 
 import {
 	transactionRepository,
 	Transaction as TransactionEntity,
 	TransactionAVC,
 } from "../../services/asyncStorage/repositories/transaction.repository";
+import { formatCurrency, getUTCDateFormat } from "../../utils/formats";
 import { TransactionData } from "../../components/TransactionCard";
 
 import * as Components from "../../components";
@@ -18,110 +22,103 @@ type Transaction = {
 	lastTransaction: string;
 };
 
-const highlights: Transaction[] = [
-	{
-		type: "up",
-		title: "Entradas",
-		amount: "17.400,00",
-		lastTransaction: "Ultima transação em 18 de junho",
-	},
-	{
-		type: "down",
-		title: "Saídas",
-		amount: "17.400,00",
-		lastTransaction: "Ultima transação em 18 de junho",
-	},
-	{
-		type: "total",
-		title: "Saídas",
-		amount: "17.400,00",
-		lastTransaction: "Ultima transação em 18 de junho",
-	},
-];
-
 export function Dashboard() {
-	const [loading, setLoading] = useState(false);
+	const theme = useTheme();
 	const [transactions, setTransactions] = useState<TransactionEntity[]>([]);
 	const [transactionsHighlights, setTransactionsHighlights] =
-		useState<TransactionAVC>({
-			down: 0,
-			up: 0,
-			total: 0,
-		});
+		useState<TransactionAVC | null>(null);
+	const [loading, setLoading] = useState(false);
 
 	const formattedTransactions = useMemo<TransactionData[]>(
 		() =>
 			transactions.map((tr) => ({
-				amount: tr.price,
+				amount: formatCurrency(tr.price),
 				id: tr.id,
 				title: tr.name,
 				type: tr.selectedType === "up" ? "positive" : "negative",
 				category: {
-					icon: tr.selectedCategory.icon || "string",
+					icon: tr.selectedCategory.icon || "",
 					label: tr.selectedCategory.name,
 				},
-				date: new Date(tr.createdAt).toLocaleDateString(),
+				date: getUTCDateFormat(tr.createdAt),
 			})),
 		[transactions]
 	);
 
+	const totalIntervalAVC = `01 a ${formatDate(
+		transactionsHighlights?.total.lastTransaction || 0
+	)}`;
+
+	const fetchTransactions = async () => {
+		setLoading(true);
+		const response = await transactionRepository.getTransactions();
+		const avc = await transactionRepository.getTransactionsAVC();
+
+		setTransactionsHighlights(avc);
+		setTransactions(response);
+		setLoading(false);
+	};
+
+	useFocusEffect(
+		useCallback(() => {
+			fetchTransactions();
+		}, [setTransactionsHighlights, setTransactions, setLoading])
+	);
+
 	useEffect(() => {
-		const execute = async () => {
-			setLoading(true);
-			const response = await transactionRepository.getTransactions();
-			const avc = await transactionRepository.getTransactionsMedia();
-
-			setTransactionsHighlights(avc);
-			setTransactions(response);
-			setLoading(false);
-		};
-
-		execute();
-	}, [transactionRepository]);
+		fetchTransactions();
+	}, []);
 
 	return (
 		<Atoms.Container>
-			<Atoms.Header>
-				<Components.Profile />
-			</Atoms.Header>
-			<Atoms.CardList>
-				<Components.HighLightCard
-					key={highlights[0].type}
-					type={highlights[0].type}
-					title={highlights[0].title}
-					amount={String(transactionsHighlights.up)}
-					lastTransaction={highlights[0].lastTransaction}
-				/>
-				<Components.HighLightCard
-					key={highlights[1].type}
-					type={highlights[1].type}
-					title={highlights[1].title}
-					amount={String(transactionsHighlights.down)}
-					lastTransaction={highlights[1].lastTransaction}
-				/>
-				<Components.HighLightCard
-					key={highlights[2].type}
-					type={highlights[2].type}
-					title={highlights[2].title}
-					amount={String(transactionsHighlights.total)}
-					lastTransaction={highlights[2].lastTransaction}
-				/>
-			</Atoms.CardList>
-			<Atoms.Transactions>
-				<Atoms.Title>Listagem</Atoms.Title>
+			{loading ? (
+				<ActivityIndicator color={theme.colors.primary} size="large" />
+			) : (
+				<>
+					<Atoms.Header>
+						<Components.Profile />
+					</Atoms.Header>
+					<Atoms.CardList>
+						<Components.HighLightCard
+							type="up"
+							title="Entradas"
+							amount={String(transactionsHighlights?.up.value)}
+							transactionDetails={
+								transactionsHighlights?.up.lastTransaction || 0
+							}
+						/>
+						<Components.HighLightCard
+							type="down"
+							title="Saídas"
+							amount={String(transactionsHighlights?.down.value)}
+							transactionDetails={
+								transactionsHighlights?.down.lastTransaction || 0
+							}
+						/>
+						<Components.HighLightCard
+							type="total"
+							title="Total"
+							amount={String(transactionsHighlights?.total.value)}
+							transactionDetails={totalIntervalAVC}
+						/>
+					</Atoms.CardList>
+					<Atoms.Transactions>
+						<Atoms.Title>Listagem</Atoms.Title>
 
-				{loading ? (
-					<Atoms.LoadingTitle />
-				) : (
-					<Atoms.TransactionList
-						keyExtractor={(item) => item.id}
-						data={formattedTransactions}
-						renderItem={({ item }) => (
-							<Components.TransactionCard transaction={item} />
+						{loading ? (
+							<Atoms.LoadingTitle />
+						) : (
+							<Atoms.TransactionList
+								keyExtractor={(item) => item.id}
+								data={formattedTransactions}
+								renderItem={({ item }) => (
+									<Components.TransactionCard transaction={item} />
+								)}
+							/>
 						)}
-					/>
-				)}
-			</Atoms.Transactions>
+					</Atoms.Transactions>
+				</>
+			)}
 		</Atoms.Container>
 	);
 }

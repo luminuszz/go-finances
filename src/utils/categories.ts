@@ -1,4 +1,11 @@
-export const categories = [
+export type Category = {
+	key: string;
+	name: string;
+	icon: string;
+	color: string;
+};
+
+export const categories: Category[] = [
 	{
 		key: "purchases",
 		name: "Compras",

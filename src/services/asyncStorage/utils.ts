@@ -8,6 +8,7 @@ export interface Connection {
 
 enum Entities {
 	transactions = "@goFinances:transactions",
+	user = "@goFinances:users",
 }
 
 export type EntityKey = keyof typeof Entities;

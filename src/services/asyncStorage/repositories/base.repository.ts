@@ -1,7 +1,8 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import uuid from "react-native-uuid";
+import { Connection, EntityKey, SetConnection } from "../utils";
 
-import { Connection, EntityKey, Parse, SetConnection } from "../utils";
+const { v4 } = uuid;
 
 @SetConnection(AsyncStorage)
 export class BaseRepository<EntityData = any[]> {
@@ -12,24 +13,25 @@ export class BaseRepository<EntityData = any[]> {
 
 	private encode = (data: any) => JSON.stringify(data);
 
+	private parse = (data: string) => JSON.parse(data);
+
+	protected generateUUID = () => String(v4());
+
 	protected parseError = (message: string, method?: string) =>
 		new Error(`Ocurred Error in method: ${method || ""} : ${message}`);
 
-	protected generateUUID = () => String(uuid.v4());
-
 	protected async save(data: EntityData[]) {
 		try {
-			this.connection.setItem(this.entityName, this.encode(data));
+			await this.connection.setItem(this.entityName, this.encode(data));
 		} catch (error) {
 			this.parseError(error.message, this.save.name);
 		}
 	}
 
-	@Parse()
 	protected async get(): Promise<EntityData[]> {
 		const data = await this.connection.getItem(this.entityName);
 
-		return !data ? [] : data;
+		return !data ? [] : this.parse(data);
 	}
 
 	protected async clear(): Promise<void> {
