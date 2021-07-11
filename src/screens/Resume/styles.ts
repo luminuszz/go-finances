@@ -22,9 +22,7 @@ export const Title = styled.Text`
 	font-size: ${({ theme }) => theme.utils.RFValue(18)}px;
 `;
 
-export const ReportListContent = styled.ScrollView.attrs({
-	contentContainerStyle: { flex: 1, padding: 24 },
-})``;
+export const ReportListContent = styled.ScrollView``;
 
 export const ChartContainer = styled.View`
 	width: 100%;

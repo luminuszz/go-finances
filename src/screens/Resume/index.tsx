@@ -1,5 +1,7 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
+import { addMonths, subMonths } from "date-fns";
 import { useFocusEffect } from "@react-navigation/native";
+import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { VictoryPie } from "victory-native";
 import { useTheme } from "styled-components";
 
@@ -10,6 +12,7 @@ import {
 import { formatCurrency } from "../../utils/formats";
 import * as Components from "../../components";
 import * as Atoms from "./styles";
+import { getMonth } from "date-fns/esm";
 
 type Report = {
 	totalCurrency: string;
@@ -21,10 +24,14 @@ type Report = {
 export function Resume() {
 	const theme = useTheme();
 	const [reports, setReports] = useState<TransactionReport["reports"]>([]);
+	const [selectedDate, setSelectedDate] = useState(new Date());
 	const [loading, setLoading] = useState(false);
 
 	const loadTransactionReport = async () => {
-		const { reports } = await transactionRepository.getTransactionsReport();
+		const { reports } = await transactionRepository.getTransactionsReport(
+			selectedDate.getMonth(),
+			selectedDate.getFullYear()
+		);
 
 		setReports(reports);
 	};
@@ -37,13 +44,20 @@ export function Resume() {
 		color: report.category.color,
 	}));
 
+	const handleChangePeriod = (action: "next" | "previous") => {
+		const changedDate =
+			action === "next"
+				? addMonths(selectedDate, 1)
+				: subMonths(selectedDate, 1);
+
+		setSelectedDate(changedDate);
+	};
+
 	useFocusEffect(
 		useCallback(() => {
 			loadTransactionReport();
-		}, [setReports])
+		}, [selectedDate])
 	);
-
-	console.log();
 
 	return (
 		<Atoms.Container>
@@ -51,7 +65,13 @@ export function Resume() {
 				<Atoms.Title>Resumo por categoria</Atoms.Title>
 			</Atoms.Header>
 
-			<Atoms.ReportListContent>
+			<Atoms.ReportListContent
+				contentContainerStyle={{
+					flex: 1,
+					paddingHorizontal: 24,
+					paddingBottom: useBottomTabBarHeight(),
+				}}
+			>
 				<Atoms.ChartContainer>
 					<VictoryPie
 						data={formattedReports}

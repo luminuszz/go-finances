@@ -1,6 +1,9 @@
+import { getMonth, getYear } from "date-fns";
+
 import { BaseRepository } from "./base.repository";
 import { Entity, resolveInstance } from "../utils";
 import { categories, Category } from "../../../utils/categories";
+import { parseISO } from "date-fns/esm";
 
 type Report = {
 	category: Category;
@@ -158,14 +161,23 @@ class TransactionRepository extends BaseRepository<Transaction> {
 		};
 	}
 
-	async getTransactionsReport(): Promise<TransactionReport> {
+	async getTransactionsReport(
+		month: number,
+		year: number
+	): Promise<TransactionReport> {
 		const transactions = await this.getTransactions();
 
-		const outTransactions = transactions.filter(
-			(tr) => tr.selectedType === "down"
-		);
+		const filteredTransactions = transactions.filter((tr) => {
+			const isOutTransaction = tr.selectedType === "down";
+			const parsedDate = parseISO(tr.createdAt as any);
 
-		const totalOutTransactions = outTransactions.reduce(
+			const inPeriod =
+				getMonth(parsedDate) === month && getYear(parsedDate) === year;
+
+			return isOutTransaction && inPeriod;
+		});
+
+		const totalOutTransactions = filteredTransactions.reduce(
 			(acc, current) => (acc += Number(current.price)),
 			0
 		);
@@ -175,7 +187,7 @@ class TransactionRepository extends BaseRepository<Transaction> {
 		categories.forEach((category) => {
 			let totalCategoryOut = 0;
 
-			outTransactions.forEach((trOut) => {
+			filteredTransactions.forEach((trOut) => {
 				if (trOut.selectedCategory.key === category.key) {
 					totalCategoryOut += Number(trOut.price);
 				}
@@ -187,7 +199,7 @@ class TransactionRepository extends BaseRepository<Transaction> {
 				reports.push({
 					amount: totalCategoryOut,
 					category,
-					percent: `${percent.toFixed(0)} %`,
+					percent: `${percent.toFixed(0)}%`,
 				});
 			}
 		});
