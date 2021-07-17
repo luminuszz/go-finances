@@ -7,3 +7,4 @@ export { default as TransactionTypeButton } from "./TransactionTypeButton";
 export { default as CategorySelectButton } from "./CategorySelectButton";
 export { default as InputForm } from "./InputForm";
 export { default as HistoryCard } from "./HistoryCard";
+export { default as SignInSocialButton } from "./SignInSocialButton";

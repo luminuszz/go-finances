@@ -5,10 +5,14 @@ import AppleSvg from "../../assets/apple.svg";
 import GoogleSvg from "../../assets/google.svg";
 import LogoSvg from "../../assets/logo.svg";
 
+import { SignInSocialButton } from "../../components";
+import { useAuth } from "../../contexts/AutContext";
+
 import * as Atoms from "./styles";
 
 export function SigIn() {
 	const { utils } = useTheme();
+	const { sigIn } = useAuth();
 
 	return (
 		<Atoms.Container>
@@ -28,7 +32,15 @@ export function SigIn() {
 				</Atoms.SigInTitle>
 			</Atoms.Header>
 
-			<Atoms.Footer></Atoms.Footer>
+			<Atoms.Footer>
+				<Atoms.FooterWrapper>
+					<SignInSocialButton
+						title="Entrar com o Google"
+						svg={GoogleSvg}
+					/>
+					<SignInSocialButton title="Entrar com a Apple" svg={AppleSvg} />
+				</Atoms.FooterWrapper>
+			</Atoms.Footer>
 		</Atoms.Container>
 	);
 }

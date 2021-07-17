@@ -1,24 +1,17 @@
 import React from "react";
-import { StatusBar } from "react-native";
 import "react-native-gesture-handler";
 import "intl";
 import "intl/locale-data/jsonp/pt-BR";
-
-import { ThemeProvider } from "styled-components";
 import {
-	useFonts,
 	Poppins_400Regular,
 	Poppins_500Medium,
 	Poppins_700Bold,
+	useFonts,
 } from "@expo-google-fonts/poppins";
+import { StatusBar } from "react-native";
 import AppLoading from "expo-app-loading";
-import { NavigationContainer } from "@react-navigation/native";
-import FlashMessageContainer from "react-native-flash-message";
 
-import theme from "./src/global/styles/theme";
-
-import { AppRoutes } from "./src/routes/app.routes";
-import { AuthProvider } from "./src/contexts/AutContext";
+import { AppProvider } from "./src/contexts";
 import { SigIn } from "./src/screens/SignIn";
 
 export default function App() {
@@ -33,19 +26,9 @@ export default function App() {
 	}
 
 	return (
-		<AuthProvider>
-			<ThemeProvider theme={theme}>
-				<NavigationContainer>
-					<StatusBar barStyle="light-content" />
-					<SigIn />
-				</NavigationContainer>
-
-				<FlashMessageContainer
-					style={{
-						marginTop: 38,
-					}}
-				/>
-			</ThemeProvider>
-		</AuthProvider>
+		<AppProvider>
+			<StatusBar barStyle="light-content" />
+			<SigIn />
+		</AppProvider>
 	);
 }
