@@ -20,26 +20,17 @@ class UsersRepository extends BaseRepository<User> {
 		return this.get();
 	}
 
-	async findOneUser(id: string) {
-		const users = await this.findAll();
+	async getUser() {
+		const user = await this.connection.getItem(this.entityName);
 
-		const user = users.find((user) => user.id === id);
-
-		return user;
+		return this.parse(user) as User;
 	}
 
-	async saveUser(createUserDTO: CreateUserDTO): Promise<User> {
-		const users = await this.findAll();
-
-		const newUser = Object.assign(createUserDTO, {
-			id: this.generateUUID(),
-		});
-
-		users.push(newUser);
-
-		await this.save(users);
-
-		return newUser;
+	async saveUser(createUserDto: User): Promise<void> {
+		await this.connection.setItem(
+			this.entityName,
+			this.encode(createUserDto)
+		);
 	}
 
 	async updateUser(

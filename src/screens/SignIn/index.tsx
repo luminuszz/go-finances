@@ -1,4 +1,6 @@
 import React from "react";
+import { useNavigation } from "@react-navigation/native";
+
 import { useTheme } from "styled-components";
 
 import AppleSvg from "../../assets/apple.svg";
@@ -6,13 +8,12 @@ import GoogleSvg from "../../assets/google.svg";
 import LogoSvg from "../../assets/logo.svg";
 
 import { SignInSocialButton } from "../../components";
-import { useAuth } from "../../contexts/AutContext";
 
 import * as Atoms from "./styles";
 
 export function SigIn() {
+	const { navigate } = useNavigation();
 	const { utils } = useTheme();
-	const { sigIn } = useAuth();
 
 	return (
 		<Atoms.Container>
@@ -39,6 +40,12 @@ export function SigIn() {
 						svg={GoogleSvg}
 					/>
 					<SignInSocialButton title="Entrar com a Apple" svg={AppleSvg} />
+
+					<SignInSocialButton
+						onPress={() => navigate("Register")}
+						title="Entrar com a go finances"
+						svg={AppleSvg}
+					/>
 				</Atoms.FooterWrapper>
 			</Atoms.Footer>
 		</Atoms.Container>

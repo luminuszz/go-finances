@@ -12,7 +12,7 @@ import { StatusBar } from "react-native";
 import AppLoading from "expo-app-loading";
 
 import { AppProvider } from "./src/contexts";
-import { SigIn } from "./src/screens/SignIn";
+import { Routes } from "./src/routes";
 
 export default function App() {
 	const [isFontsLoaded] = useFonts({
@@ -28,7 +28,7 @@ export default function App() {
 	return (
 		<AppProvider>
 			<StatusBar barStyle="light-content" />
-			<SigIn />
+			<Routes />
 		</AppProvider>
 	);
 }

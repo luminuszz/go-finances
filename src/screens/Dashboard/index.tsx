@@ -3,6 +3,7 @@ import { ActivityIndicator } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 import { useTheme } from "styled-components";
 import { formatDate } from "../../utils/formats";
+import { useTransactionsResume } from "../../services/api/transactions/useTransactionResume";
 
 import {
 	transactionRepository,

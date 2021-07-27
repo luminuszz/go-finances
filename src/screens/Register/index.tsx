@@ -1,163 +1,87 @@
-import React from "react";
-import { Keyboard, Modal, TouchableWithoutFeedback, Alert } from "react-native";
-import { useNavigation } from "@react-navigation/native";
 import { yupResolver } from "@hookform/resolvers/yup";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
-import * as yup from "yup";
+import * as Yup from "yup";
 
-import { transactionRepository } from "../../services/asyncStorage/repositories/transaction.repository";
+import { InputForm, Button } from "../../components";
+import { useAuth } from "../../contexts/AutContext";
 import { useMessage } from "../../hooks/useMessage";
-import { CategorySelect } from "../CategorySelect";
-import * as Components from "../../components";
-
 import * as Atoms from "./styles";
-type CategoryDTO = {
-	key: string;
-	name: string;
-	icon: string;
-};
 
 type FormPayload = {
-	name: string;
-	price: number;
-	selectedType: "up" | "down";
-	selectedCategory: CategoryDTO;
+	email: string;
+	password: string;
 };
 
-const schema = yup.object().shape({
-	name: yup.string().required(),
-	price: yup
-		.number()
-		.typeError("Informe um valor numérico")
-		.positive()
-		.required(),
-	selectedType: yup.string().required(),
-	selectedCategory: yup.object({
-		key: yup.string(),
-		name: yup.string().required(),
-		icon: yup.string(),
-	}),
+const schema = Yup.object().shape({
+	email: Yup.string().required(),
+	password: Yup.string().required(),
 });
 
 export function Register() {
-	const [categoryModelOpen, setCategoryModelOpen] = React.useState(false);
+	const [loading, setLoading] = useState(false);
+	const { sigIn } = useAuth();
 	const { showMessage } = useMessage();
-	const { navigate } = useNavigation();
 
 	const {
 		control,
-		handleSubmit,
-		watch,
 		formState: { errors },
-		setValue,
-		reset,
+		handleSubmit,
 	} = useForm<FormPayload>({
-		resolver: yupResolver(schema),
 		reValidateMode: "onChange",
 		defaultValues: {
-			selectedCategory: {
-				icon: "",
-				key: "",
-				name: "Selecione",
-			},
+			email: "",
+			password: "",
 		},
+		resolver: yupResolver(schema),
 	});
 
-	const handleCloseModal = React.useCallback(
-		() => setCategoryModelOpen(false),
-		[setCategoryModelOpen]
-	);
-
-	const handleOpenModal = () => setCategoryModelOpen(true);
-
-	const sendNewTransaction = async (formPayload: FormPayload) => {
+	const handleLogin = async ({ email, password }: FormPayload) => {
 		try {
-			await transactionRepository.saveTransaction(formPayload);
-
-			showMessage("Transação salva com sucesso !", "success");
-			reset();
-			navigate("Listagem");
+			setLoading(true);
+			await sigIn(email, password);
 		} catch (error) {
-			console.error(error);
-
-			showMessage("Não possível salvar a transação", "danger");
+		} finally {
+			setLoading(false);
 		}
 	};
 
-	const [watchTransactionTypeType, watchSelectedCategory] = watch([
-		"selectedType",
-		"selectedCategory",
-	]);
-
-	React.useEffect(() => {
-		(async () => {
-			const data = await transactionRepository.getTransactions();
-
-			console.log(data);
-		})();
-	}, []);
-
 	return (
-		<TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-			<Atoms.Container>
-				<Atoms.Header>
-					<Atoms.Title>Cadastro</Atoms.Title>
-				</Atoms.Header>
-
-				<Atoms.Form>
-					<Atoms.Fields>
-						<Components.InputForm
-							control={control}
-							name="name"
-							placeholder="Nome"
-							autoCapitalize="sentences"
-							autoCorrect={false}
-							error={errors.name?.message}
-						/>
-						<Components.InputForm
-							name="price"
-							control={control}
-							placeholder="Preço"
-							autoCapitalize="none"
-							keyboardType="numeric"
-							error={errors.price?.message}
-						/>
-						<Atoms.TransactionsTypes>
-							<Components.TransactionTypeButton
-								onPress={() => setValue("selectedType", "up")}
-								isActive={watchTransactionTypeType === "up"}
-								title="Entrada"
-								type="up"
-							/>
-							<Components.TransactionTypeButton
-								onPress={() => setValue("selectedType", "down")}
-								isActive={watchTransactionTypeType === "down"}
-								title="Saída"
-								type="down"
-							/>
-						</Atoms.TransactionsTypes>
-
-						<Components.CategorySelectButton
-							icon={watchSelectedCategory?.icon}
-							title={watchSelectedCategory?.name}
-							onPress={handleOpenModal}
-						/>
-					</Atoms.Fields>
-					<Components.Button
-						title="Cadastrar"
-						onPress={handleSubmit(sendNewTransaction)}
+		<Atoms.Container>
+			<Atoms.SigInTitle>LOGIN</Atoms.SigInTitle>
+			<Atoms.Form>
+				<Atoms.FormControl>
+					<InputForm
+						control={control}
+						name="email"
+						placeholder="E-mail"
+						autoCorrect={false}
+						autoCompleteType="email"
+						keyboardType="email-address"
+						textContentType="emailAddress"
+						error={errors.email?.message}
 					/>
-				</Atoms.Form>
-				<Modal visible={categoryModelOpen}>
-					<CategorySelect
-						category={watchSelectedCategory}
-						closeSelect={handleCloseModal}
-						setCategory={(category: CategoryDTO) =>
-							setValue("selectedCategory", category)
-						}
+				</Atoms.FormControl>
+				<Atoms.FormControl>
+					<InputForm
+						control={control}
+						name="password"
+						placeholder="Senha"
+						autoCorrect={false}
+						secureTextEntry
+						autoCapitalize="none"
+						error={errors.password?.message}
 					/>
-				</Modal>
-			</Atoms.Container>
-		</TouchableWithoutFeedback>
+				</Atoms.FormControl>
+
+				<Atoms.FormControl>
+					<Button
+						enabled={!loading}
+						title={loading ? "Enviando..." : "Entrar"}
+						onPress={handleSubmit(handleLogin)}
+					/>
+				</Atoms.FormControl>
+			</Atoms.Form>
+		</Atoms.Container>
 	);
 }

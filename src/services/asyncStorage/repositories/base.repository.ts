@@ -7,13 +7,13 @@ const { v4 } = uuid;
 @SetConnection(AsyncStorage)
 export class BaseRepository<EntityData = any[]> {
 	constructor(
-		private readonly entityName: EntityKey,
+		protected readonly entityName: EntityKey,
 		protected readonly connection: Connection
 	) {}
 
-	private encode = (data: any) => JSON.stringify(data);
+	protected encode = (data: any) => JSON.stringify(data);
 
-	private parse = (data: string) => JSON.parse(data);
+	protected parse = (data: string) => JSON.parse(data);
 
 	protected generateUUID = () => String(v4());
 

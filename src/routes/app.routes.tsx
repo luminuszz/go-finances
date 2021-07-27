@@ -4,7 +4,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 
 import { Dashboard } from "../screens/Dashboard";
-import { Register } from "../screens/Register";
+import { CreateTransaction } from "../screens/CreateTransaction";
 import { Resume } from "../screens/Resume";
 import { useTheme } from "styled-components";
 
@@ -15,7 +15,7 @@ export function AppRoutes() {
 
 	return (
 		<Navigator
-			initialRouteName="Cadastrar"
+			initialRouteName="Listagem"
 			tabBarOptions={{
 				activeTintColor: theme.colors.secondary,
 				inactiveTintColor: theme.colors.text,
@@ -40,7 +40,7 @@ export function AppRoutes() {
 				}}
 			/>
 			<Screen
-				component={Register}
+				component={CreateTransaction}
 				name="Cadastrar"
 				options={{
 					tabBarIcon: ({ size, color }) => (
